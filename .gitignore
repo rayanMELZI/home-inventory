@@ -23,3 +23,6 @@ hs_err_pid*
 
 # Local Claude working guide (not versioned)
 CLAUDE.md
+
+# Next.js generates this on every build
+next-env.d.ts
