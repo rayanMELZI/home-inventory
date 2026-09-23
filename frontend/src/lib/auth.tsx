@@ -66,6 +66,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
+    // Push anything still queued before the session goes, then drop the local
+    // pantry so the next person on this device cannot read it.
+    //
+    // If the sync could not happen — offline, server down — the data stays on
+    // disk rather than being destroyed. It is not left exposed: signing in as
+    // a different account wipes it before anything is read (see openFor).
+    const { pendingCount } = await import("./db");
+    const { sync, forgetLocal } = await import("./sync");
+    await sync();
+    if ((await pendingCount()) === 0) await forgetLocal();
+
     await apiClient.logout();
     rememberUser(null);
     setUser(null);

@@ -112,14 +112,7 @@ public class ItemService {
             return ItemDtos.toResponse(item);
         }
 
-        // You cannot use more than you have, so the delta is trimmed to what
-        // was actually there — and the TRIMMED value is what gets stored.
-        //
-        // Clamping the running total instead would be the obvious move and is
-        // wrong: the total must stay the exact sum of the deltas. Anything
-        // else is order-dependent, and two devices replaying the same events
-        // offline in a different order would settle on different numbers.
-        BigDecimal effective = delta.signum() < 0 ? delta.max(item.getQuantity().negate()) : delta;
+        BigDecimal effective = Stock.effectiveDelta(item.getQuantity(), delta);
         if (effective.signum() == 0) {
             throw ApiException.badRequest("There is no " + item.getName() + " left");
         }

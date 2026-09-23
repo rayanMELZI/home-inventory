@@ -37,6 +37,8 @@ public class ItemDtos {
             BigDecimal quantity,
             BigDecimal lowThreshold,
             boolean low,
+            /* Carried so a syncing client learns what was removed while it was away. */
+            boolean archived,
             Instant updatedAt) {}
 
     public record EventResponse(
@@ -48,14 +50,15 @@ public class ItemDtos {
             String note,
             Instant occurredAt) {}
 
-    static ItemResponse toResponse(Item item) {
+    public static ItemResponse toResponse(Item item) {
         boolean low = item.getLowThreshold() != null
                 && item.getQuantity().compareTo(item.getLowThreshold()) <= 0;
         return new ItemResponse(item.getId(), item.getName(), item.getCategory(), item.getUnit(),
-                item.getQuantity(), item.getLowThreshold(), low, item.getUpdatedAt());
+                item.getQuantity(), item.getLowThreshold(), low, item.isArchived(),
+                item.getUpdatedAt());
     }
 
-    static EventResponse toResponse(ItemEvent event) {
+    public static EventResponse toResponse(ItemEvent event) {
         return new EventResponse(event.getId(), event.getItemId(), event.getType(),
                 event.getQuantityDelta(), event.getUnitPrice(), event.getNote(),
                 event.getOccurredAt());

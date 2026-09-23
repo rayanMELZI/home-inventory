@@ -2,14 +2,24 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
-import { RequireAuth } from "@/lib/auth";
+import { RequireAuth, useAuth } from "@/lib/auth";
 import { PageHeader, PageShell } from "@/components/ui/Page";
 import { SkeletonCard } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
 import { ItemCard } from "@/components/ItemCard";
 import { ItemForm } from "@/components/ItemForm";
-import { archiveItem, createItem, listItems, recordEvent, updateItem, type ItemDraft } from "@/lib/items";
-import { ApiError } from "@/lib/api";
+import { useOnline } from "@/lib/offline";
+import {
+  archiveItemLocally,
+  clearRejection,
+  loadPantry,
+  openFor,
+  recordEventLocally,
+  saveItemLocally,
+  sync,
+  useSyncState,
+  type ItemDraft,
+} from "@/lib/sync";
 import type { Item } from "@/lib/types";
 
 const ALL = "__all__";
@@ -23,6 +33,10 @@ export default function PantryPage() {
 }
 
 function Pantry() {
+  const { user } = useAuth();
+  const online = useOnline();
+  const { pending, lastRejection } = useSyncState();
+
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -33,16 +47,34 @@ function Pantry() {
   const [toast, setToast] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
 
-  const reload = useCallback(
-    () => listItems().then(setItems),
-    [],
-  );
+  const redraw = useCallback(async () => {
+    setItems(await loadPantry());
+  }, []);
 
+  // Everything is read from the on-device copy, so the list paints whether or
+  // not there is a network. The sync afterwards is what refreshes it.
   useEffect(() => {
-    reload()
-      .catch((err) => setToast(err instanceof ApiError ? err.message : "Could not load your pantry"))
-      .finally(() => setLoading(false));
-  }, [reload]);
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      await openFor(user.id);
+      if (!cancelled) await redraw();
+      setLoading(false);
+      await sync();
+      if (!cancelled) await redraw();
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, redraw]);
+
+  // Coming back online is the moment the outbox should drain.
+  useEffect(() => {
+    if (!online) return;
+    sync().then(redraw);
+  }, [online, redraw]);
+
+  const message = toast ?? lastRejection;
 
   const categories = useMemo(
     () => [...new Set(items.map((i) => i.category).filter((c): c is string => !!c))].sort(),
@@ -58,43 +90,30 @@ function Pantry() {
     );
   }, [items, search, category]);
 
-  // One tap moves stock. The new total comes back from the server and replaces
-  // just that row, so the rest of the list never flickers.
+  // One tap writes to disk and returns. The network is not in the way, so this
+  // is exactly as fast with the server down as with it up.
   async function onStep(item: Item, delta: number) {
     setStepping(item.id);
     try {
-      const updated = await recordEvent(item.id, delta > 0 ? "PURCHASE" : "CONSUME", delta);
+      const updated = await recordEventLocally(item, delta > 0 ? "PURCHASE" : "CONSUME", delta);
       setItems((current) => current.map((i) => (i.id === updated.id ? updated : i)));
-    } catch (err) {
-      setToast(err instanceof ApiError ? err.message : "That didn't save");
     } finally {
       setStepping(null);
     }
   }
 
   async function onSave(draft: ItemDraft) {
-    if (editing) {
-      const updated = await updateItem(editing.id, draft);
-      setItems((current) => current.map((i) => (i.id === updated.id ? updated : i)));
-    } else {
-      const created = await createItem(draft);
-      setItems((current) => [...current, created].sort((a, b) => a.name.localeCompare(b.name)));
-    }
+    await saveItemLocally(editing, draft);
+    await redraw();
   }
 
   async function onArchive(item: Item) {
-    await archiveItem(item.id);
-    setItems((current) => current.filter((i) => i.id !== item.id));
+    await archiveItemLocally(item);
+    await redraw();
     setToast(`${item.name} removed`);
   }
 
-  function openAdd() {
-    setEditing(null);
-    setFormKey((n) => n + 1);
-    setFormOpen(true);
-  }
-
-  function openEdit(item: Item) {
+  function open(item: Item | null) {
     setEditing(item);
     setFormKey((n) => n + 1);
     setFormOpen(true);
@@ -104,9 +123,17 @@ function Pantry() {
     <PageShell>
       <PageHeader
         title="Pantry"
-        subtitle="Everything you have at home, and how much of it is left."
+        subtitle={
+          pending > 0
+            ? `${pending} change${pending === 1 ? "" : "s"} waiting to sync.`
+            : "Everything you have at home, and how much of it is left."
+        }
         actions={
-          <button type="button" onClick={openAdd} className="btn btn-primary px-4 max-sm:w-11 max-sm:px-0">
+          <button
+            type="button"
+            onClick={() => open(null)}
+            className="btn btn-primary px-4 max-sm:w-11 max-sm:px-0"
+          >
             <Plus size={16} />
             <span className="max-sm:hidden">Add item</span>
           </button>
@@ -150,7 +177,7 @@ function Pantry() {
       ) : items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-line-strong p-8 text-center">
           <p className="text-ink-soft">Your pantry is empty.</p>
-          <button type="button" onClick={openAdd} className="btn btn-primary mt-3">
+          <button type="button" onClick={() => open(null)} className="btn btn-primary mt-3">
             <Plus size={16} />
             Add the first thing
           </button>
@@ -167,7 +194,7 @@ function Pantry() {
               item={item}
               busy={stepping === item.id}
               onStep={onStep}
-              onEdit={openEdit}
+              onEdit={open}
             />
           ))}
         </div>
@@ -184,8 +211,16 @@ function Pantry() {
         onArchive={onArchive}
       />
 
-      <Toast open={toast !== null} onClose={() => setToast(null)}>
-        {toast}
+      {/* A refusal from the server reads as a message like any other, taken
+          straight from the sync store rather than copied into state here. */}
+      <Toast
+        open={message !== null}
+        onClose={() => {
+          setToast(null);
+          clearRejection();
+        }}
+      >
+        {message}
       </Toast>
     </PageShell>
   );

@@ -40,6 +40,19 @@ async function send(path: string, init: RequestInit): Promise<Response> {
     reportUnreachable();
     throw new ApiError(0, "You're offline — this didn't reach the server.");
   }
+  // A gateway error means something between here and the backend is down.
+  // That is "offline" even though a response did arrive, and it has to reach
+  // callers the same way a dead socket does — as a throw. Returning it would
+  // make a failed token refresh look like a rejected one, and the app would
+  // show the login screen to someone who is merely off the network.
+  if (res.status === 502 || res.status === 503 || res.status === 504) {
+    reportUnreachable();
+    throw new ApiError(0, "You're offline — this didn't reach the server.");
+  }
+
+  // The service worker stamps this on a cache hit it served because the
+  // network was down. Unlike the above it carries real (if stale) data, so it
+  // is handed back rather than thrown.
   if (res.headers.get("x-homestock-offline") === "1") reportUnreachable();
   else reportReachable();
   return res;

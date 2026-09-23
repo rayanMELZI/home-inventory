@@ -5,7 +5,7 @@ import { Trash2 } from "lucide-react";
 import { Modal } from "@/components/Modal";
 import { Segmented } from "@/components/ui/Segmented";
 import { ApiError } from "@/lib/api";
-import { suggestNames, type ItemDraft } from "@/lib/items";
+import { localNameSuggestions, type ItemDraft } from "@/lib/sync";
 import { UNIT_LABELS, type Item, type Unit } from "@/lib/types";
 
 const UNITS: { value: Unit; label: string }[] = [
@@ -54,7 +54,7 @@ export function ItemForm({
     if (!wantsSuggestions) return;
     let cancelled = false;
     const timer = setTimeout(() => {
-      suggestNames(typed)
+      localNameSuggestions(typed)
         .then((names) => {
           if (!cancelled) setSuggestions(names);
         })

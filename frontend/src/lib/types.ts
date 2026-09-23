@@ -21,6 +21,8 @@ export interface Item {
   quantity: number;
   lowThreshold: number | null;
   low: boolean;
+  /** Kept on disk after removal so a sync can tell "gone" from "never seen". */
+  archived: boolean;
   updatedAt: string;
 }
 
