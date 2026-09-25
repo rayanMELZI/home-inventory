@@ -1,4 +1,8 @@
-name: homestock
+# Distinct from the production stack (which is just "homestock"), so running
+# both on one machine cannot share a database volume. Postgres only applies
+# POSTGRES_PASSWORD when it first initialises, so a shared volume means the
+# second stack authenticates with a password the data directory never saw.
+name: homestock-dev
 
 # Local all-in-one stack: builds both images from source.
 #   cp .env.example .env   (fill in the secrets)
