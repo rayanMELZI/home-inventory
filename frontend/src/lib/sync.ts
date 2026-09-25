@@ -130,14 +130,14 @@ export async function recordEventLocally(
   item: Item,
   type: EventType,
   quantityDelta: number,
-  extra: { unitPrice?: number; note?: string } = {},
+  extra: { totalPrice?: number; note?: string } = {},
 ): Promise<Item> {
   const event: ItemEvent = {
     id: crypto.randomUUID(),
     itemId: item.id,
     type,
     quantityDelta,
-    unitPrice: extra.unitPrice ?? null,
+    totalPrice: extra.totalPrice ?? null,
     note: extra.note ?? null,
     occurredAt: new Date().toISOString(),
   };

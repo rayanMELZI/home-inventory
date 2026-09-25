@@ -54,16 +54,15 @@ export async function summariseMonth(month: string = currentMonth()): Promise<Mo
     const bucket = categories.get(category) ?? { category, spent: 0, earned: 0 };
 
     // Only the two types that carry money move money. A CONSUME has no price
-    // by construction — see EventType.carriesMoney on the server.
-    if (event.unitPrice != null) {
-      // The delta is signed, so its size is the amount that changed hands.
-      const value = Math.abs(event.quantityDelta) * event.unitPrice;
+    // by construction — see EventType.carriesMoney on the server. The stored
+    // figure is already the line total, so there is nothing to multiply.
+    if (event.totalPrice != null) {
       if (event.type === "PURCHASE") {
-        spent += value;
-        bucket.spent += value;
+        spent += event.totalPrice;
+        bucket.spent += event.totalPrice;
       } else if (event.type === "SELL") {
-        earned += value;
-        bucket.earned += value;
+        earned += event.totalPrice;
+        bucket.earned += event.totalPrice;
       }
     }
 

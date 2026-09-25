@@ -32,7 +32,8 @@ export interface ItemEvent {
   itemId: string;
   type: EventType;
   quantityDelta: number;
-  unitPrice: number | null;
+  /** What the whole line cost, not a price per unit — see migration V3. */
+  totalPrice: number | null;
   note: string | null;
   occurredAt: string;
 }

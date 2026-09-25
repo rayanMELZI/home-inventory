@@ -53,12 +53,12 @@ function Shopping() {
   // Something you do not own yet gets onto it by being added with no stock.
   const needed = items.filter((item) => item.low);
 
-  async function onBought(item: Item, amount: number, unitPrice: number | null) {
+  async function onBought(item: Item, amount: number, totalPrice: number | null) {
     await recordEventLocally(
       item,
       "PURCHASE",
       amount,
-      unitPrice != null ? { unitPrice } : {},
+      totalPrice != null ? { totalPrice } : {},
     );
     await redraw();
     setToast(`${item.name} restocked`);
@@ -124,7 +124,7 @@ function ShoppingRow({
   onBought,
 }: {
   item: Item;
-  onBought: (item: Item, amount: number, unitPrice: number | null) => Promise<void>;
+  onBought: (item: Item, amount: number, totalPrice: number | null) => Promise<void>;
 }) {
   // Pre-filled with enough to get back ABOVE the level they set — one step
   // past it, not exactly to it. "Low" means at or below the threshold, so
@@ -139,10 +139,10 @@ function ShoppingRow({
   async function confirm() {
     const quantity = Number(amount);
     if (!Number.isFinite(quantity) || quantity <= 0) return;
-    const unitPrice = price.trim() === "" ? null : Number(price);
+    const paid = price.trim() === "" ? null : Number(price);
     setBusy(true);
     try {
-      await onBought(item, quantity, Number.isFinite(unitPrice as number) ? unitPrice : null);
+      await onBought(item, quantity, paid != null && Number.isFinite(paid) ? paid : null);
     } finally {
       setBusy(false);
     }
@@ -173,7 +173,7 @@ function ShoppingRow({
       </label>
 
       <label className="block">
-        <span className="field-label">Price each</span>
+        <span className="field-label">Paid</span>
         <input
           type="number"
           min={0}
@@ -182,7 +182,7 @@ function ShoppingRow({
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           placeholder="—"
-          aria-label={`What one ${item.name} cost`}
+          aria-label={`What you paid in total for the ${item.name}`}
           className="field mt-1 w-24"
         />
       </label>
