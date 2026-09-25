@@ -6,6 +6,7 @@ import { RequireAuth, useAuth } from "@/lib/auth";
 import { useTheme, type Theme } from "@/lib/theme";
 import { PageHeader, PageShell } from "@/components/ui/Page";
 import { Segmented } from "@/components/ui/Segmented";
+import { SpendCard } from "@/components/SpendCard";
 import { downloadBackup, restoreBackup } from "@/lib/backup";
 import { sync, useSyncState } from "@/lib/sync";
 import { ApiError } from "@/lib/api";
@@ -91,6 +92,8 @@ function Settings() {
           </button>
         </div>
       </div>
+
+      <SpendCard />
 
       <div className="card mt-4 space-y-3 p-4">
         <div>
