@@ -42,19 +42,32 @@ Then point a Cloudflare tunnel hostname at `127.0.0.1:3005`.
 
 Settings → Secrets and variables → Actions → **Secrets**.
 
-| Secret | What it is |
-|---|---|
-| `POSTGRES_PASSWORD` | Database password. Pick it now — changing it later is awkward, see below. |
-| `JWT_SECRET` | Signs access tokens. `openssl rand -base64 48` |
-| `DEPLOY_HOST` | The VM's tunnel hostname. |
-| `DEPLOY_USER` | The CI user on the VM (`deploy`). |
-| `DEPLOY_KEY` | That user's **private** SSH key, whole file including the header line. |
-| `CF_ACCESS_CLIENT_ID` | Cloudflare Access service token id. |
-| `CF_ACCESS_CLIENT_SECRET` | Cloudflare Access service token secret. |
-| `GEMINI_API_KEY` | Optional. Meal suggestions only — blank disables that one feature and nothing else. https://aistudio.google.com/apikey |
+Secrets do not cross repositories, so every one of these has to be added to
+this repo even where fromNowToSuccess already has the same thing. The right
+column says whether the *value* can be copied across.
 
-The first five are checked before anything is copied, so a missing one fails
-the deploy immediately with a message naming it, rather than halfway through.
+| Secret | What it is | Same value as fnts? |
+|---|---|---|
+| `POSTGRES_PASSWORD` | Database password. Pick it now — changing it later is awkward, see below. | No — different database, generate a new one |
+| `JWT_SECRET` | Signs access tokens. `openssl rand -base64 48` | No — generate a new one |
+| `DEPLOY_HOST` | The VM's tunnel hostname. | **Yes** — same VM |
+| `DEPLOY_USER` | The CI user on the VM (`deploy`). | **Yes** |
+| `DEPLOY_KEY` | That user's **private** SSH key, whole file including the header line. | **Yes** — the same key already authorised on the VM |
+| `CF_ACCESS_CLIENT_ID` | Cloudflare Access service token id. Only needed if the SSH hostname is gated by an Access policy. | **Yes**, if you still have it — the secret half is shown once, so create a new service token if not |
+| `CF_ACCESS_CLIENT_SECRET` | The other half of the above. | Same |
+| `GEMINI_API_KEY` | Optional. Meal suggestions only — blank disables that one feature and nothing else. | **Yes** — one key is fine for both |
+
+`POSTGRES_PASSWORD`, `JWT_SECRET`, `DEPLOY_HOST`, `DEPLOY_USER` and
+`DEPLOY_KEY` are checked before anything is copied, so a missing one fails the
+deploy immediately with a message naming it, rather than halfway through.
+
+The two `CF_ACCESS_*` are deliberately **not** in that check: `cloudflared
+access ssh` works without them when the hostname is not behind an Access
+policy. Leave them unset if that is your setup, and the deploy still works.
+
+**Nothing else from fnts is needed here.** `DATA_ENCRYPTION_KEY`, `VAPID_*`,
+`MAIL_*`, `FEEDBACK_NOTIFY_TO`, `GH_ISSUES_TOKEN` and `FEEDBACK_ISSUES_REPO`
+all belong to features this app does not have.
 
 ### 3. Repository variables
 
@@ -72,9 +85,19 @@ The deploy job declares `environment: production`. GitHub creates it on the
 first run. If you want a manual approval before anything reaches the VM, add a
 required reviewer under Settings → Environments → production.
 
-### 5. Push to main
+### 5. Try it without deploying first
+
+Open a pull request instead of pushing. The tests and **both image builds**
+run on a PR; the deploy job does not. That exercises most of the pipeline —
+including the Docker builds, which are where the surprises live — with nothing
+touching the VM.
+
+### 6. Push to main
 
 That is the whole deploy. Watch it under Actions → CI.
+
+The first run is the slow one: no build cache, and Maven fetches the world.
+Expect roughly ten minutes.
 
 ## Things that will bite you
 
