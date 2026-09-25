@@ -101,8 +101,8 @@ public class ItemService {
             throw ApiException.badRequest(
                     request.type() + " cannot carry a delta of " + delta.toPlainString());
         }
-        if (request.unitPrice() != null && !request.type().carriesMoney()) {
-            throw ApiException.badRequest("A unit price only makes sense on a purchase or a sale");
+        if (request.totalPrice() != null && !request.type().carriesMoney()) {
+            throw ApiException.badRequest("A price only makes sense on a purchase or a sale");
         }
 
         UUID eventId = request.id() != null ? request.id() : UUID.randomUUID();
@@ -123,7 +123,7 @@ public class ItemService {
         event.setItemId(item.getId());
         event.setType(request.type());
         event.setQuantityDelta(effective);
-        event.setUnitPrice(request.unitPrice());
+        event.setTotalPrice(request.totalPrice());
         event.setNote(request.note());
         event.setOccurredAt(request.occurredAt() != null ? request.occurredAt() : Instant.now());
         eventRepository.save(event);

@@ -25,7 +25,7 @@ public class ItemDtos {
             UUID id,
             @NotNull EventType type,
             @NotNull BigDecimal quantityDelta,
-            @DecimalMin("0.0") BigDecimal unitPrice,
+            @DecimalMin("0.0") BigDecimal totalPrice,
             @Size(max = 200) String note,
             Instant occurredAt) {}
 
@@ -46,7 +46,7 @@ public class ItemDtos {
             UUID itemId,
             EventType type,
             BigDecimal quantityDelta,
-            BigDecimal unitPrice,
+            BigDecimal totalPrice,
             String note,
             Instant occurredAt) {}
 
@@ -60,7 +60,7 @@ public class ItemDtos {
 
     public static EventResponse toResponse(ItemEvent event) {
         return new EventResponse(event.getId(), event.getItemId(), event.getType(),
-                event.getQuantityDelta(), event.getUnitPrice(), event.getNote(),
+                event.getQuantityDelta(), event.getTotalPrice(), event.getNote(),
                 event.getOccurredAt());
     }
 

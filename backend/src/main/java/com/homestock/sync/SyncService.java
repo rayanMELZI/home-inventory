@@ -134,7 +134,7 @@ public class SyncService {
             event.setItemId(item.getId());
             event.setType(payload.type());
             event.setQuantityDelta(effective);
-            event.setUnitPrice(payload.type().carriesMoney() ? payload.unitPrice() : null);
+            event.setTotalPrice(payload.type().carriesMoney() ? payload.totalPrice() : null);
             event.setNote(payload.note());
             event.setOccurredAt(payload.occurredAt());
             eventRepository.save(event);

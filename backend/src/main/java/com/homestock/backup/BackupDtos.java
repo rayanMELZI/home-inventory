@@ -45,7 +45,7 @@ public class BackupDtos {
             @NotNull UUID itemId,
             @NotNull EventType type,
             @NotNull BigDecimal quantityDelta,
-            BigDecimal unitPrice,
+            BigDecimal totalPrice,
             String note,
             @NotNull Instant occurredAt) {}
 

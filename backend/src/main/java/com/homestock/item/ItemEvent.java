@@ -37,9 +37,12 @@ public class ItemEvent {
     @Column(name = "quantity_delta", nullable = false)
     private BigDecimal quantityDelta;
 
-    /** Price per unit, on purchases and sales. This is where the money view comes from. */
-    @Column(name = "unit_price")
-    private BigDecimal unitPrice;
+    /**
+     * What was actually paid (or received) for this line, not a price per unit.
+     * A per-unit price cannot be stored in money precision — see V3.
+     */
+    @Column(name = "total_price")
+    private BigDecimal totalPrice;
 
     private String note;
 

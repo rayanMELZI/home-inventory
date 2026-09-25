@@ -99,8 +99,18 @@ class ItemServiceTest {
     void buyingNeverGetsTrimmed() {
         var response = service.applyEvent(USER, eggs.getId(),
                 new EventRequest(UUID.randomUUID(), EventType.PURCHASE, new BigDecimal("12"),
-                        new BigDecimal("0.30"), null, null));
+                        new BigDecimal("3.60"), null, null));
 
         assertThat(response.quantity()).isEqualByComparingTo("15");
+    }
+
+    /** Money only belongs on the two types that move it. */
+    @Test
+    void aPriceOnAConsumeIsRefused() {
+        assertThatThrownBy(() -> service.applyEvent(USER, eggs.getId(),
+                new EventRequest(UUID.randomUUID(), EventType.CONSUME, new BigDecimal("-1"),
+                        new BigDecimal("2.50"), null, null)))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("price only makes sense");
     }
 }

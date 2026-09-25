@@ -55,7 +55,7 @@ public class BackupService {
 
         List<BackupEvent> events = eventRepository.findByUserId(userId).stream()
                 .map(event -> new BackupEvent(event.getId(), event.getItemId(), event.getType(),
-                        event.getQuantityDelta(), event.getUnitPrice(), event.getNote(),
+                        event.getQuantityDelta(), event.getTotalPrice(), event.getNote(),
                         event.getOccurredAt()))
                 .toList();
 
@@ -125,7 +125,7 @@ public class BackupService {
             event.setItemId(incoming.itemId());
             event.setType(incoming.type());
             event.setQuantityDelta(incoming.quantityDelta());
-            event.setUnitPrice(incoming.unitPrice());
+            event.setTotalPrice(incoming.totalPrice());
             event.setNote(incoming.note());
             event.setOccurredAt(incoming.occurredAt());
             eventRepository.save(event);

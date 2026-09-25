@@ -38,7 +38,7 @@ public class SyncDtos {
             @NotNull UUID itemId,
             @NotNull EventType type,
             @NotNull BigDecimal quantityDelta,
-            BigDecimal unitPrice,
+            BigDecimal totalPrice,
             @Size(max = 200) String note,
             @NotNull Instant occurredAt) {}
 
