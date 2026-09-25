@@ -1,0 +1,23 @@
+# core.autocrlf=true rewrites checked-out files with CRLF, which is fine for
+# Windows editors and fatal for anything Linux has to execute: a shebang
+# followed by \r is not a valid interpreter, and the Docker build dies with
+# "exit code 127" that looks nothing like a line-ending problem.
+#
+# Default: let git decide, but normalise to LF in the repository.
+* text=auto eol=lf
+
+# Executed inside containers and on CI runners — must be LF whatever the host.
+backend/mvnw text eol=lf
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Windows-only, so these keep CRLF.
+backend/mvnw.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Never touched.
+*.png binary
+*.jpg binary
+*.ico binary
