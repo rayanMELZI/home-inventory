@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { Nav } from "@/components/Nav";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { RegisterSW } from "@/components/RegisterSW";
+import { SyncBootstrap } from "@/components/SyncBootstrap";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <ThemeProvider>
           <AuthProvider>
             <RegisterSW />
+            <SyncBootstrap />
             <div className="sticky top-0 z-40">
               <OfflineBanner />
               <Nav />

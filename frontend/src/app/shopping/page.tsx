@@ -8,10 +8,10 @@ import { Toast } from "@/components/ui/Toast";
 import { ItemForm } from "@/components/ItemForm";
 import {
   loadPantry,
-  openFor,
   recordEventLocally,
   saveItemLocally,
   archiveItemLocally,
+  useSyncState,
   type ItemDraft,
 } from "@/lib/sync";
 import { UNIT_LABELS, UNIT_STEP, formatQuantity, type Item } from "@/lib/types";
@@ -26,6 +26,7 @@ export default function ShoppingPage() {
 
 function Shopping() {
   const { user } = useAuth();
+  const { lastSyncedAt } = useSyncState();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
@@ -36,18 +37,20 @@ function Shopping() {
     setItems(await loadPantry());
   }, []);
 
+  // Reads from the on-device copy; SyncBootstrap keeps that copy fresh.
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      await openFor(user.id);
-      if (!cancelled) await redraw();
+      const loaded = await loadPantry();
+      if (cancelled) return;
+      setItems(loaded);
       setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
-  }, [user, redraw]);
+  }, [user, lastSyncedAt]);
 
   // The list is not a table of its own — it is just the pantry, filtered.
   // Something you do not own yet gets onto it by being added with no stock.

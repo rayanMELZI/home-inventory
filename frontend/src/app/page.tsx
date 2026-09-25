@@ -8,15 +8,12 @@ import { SkeletonCard } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
 import { ItemCard } from "@/components/ItemCard";
 import { ItemForm } from "@/components/ItemForm";
-import { useOnline } from "@/lib/offline";
 import {
   archiveItemLocally,
   clearRejection,
   loadPantry,
-  openFor,
   recordEventLocally,
   saveItemLocally,
-  sync,
   useSyncState,
   type ItemDraft,
 } from "@/lib/sync";
@@ -34,8 +31,7 @@ export default function PantryPage() {
 
 function Pantry() {
   const { user } = useAuth();
-  const online = useOnline();
-  const { pending, lastRejection } = useSyncState();
+  const { pending, lastRejection, lastSyncedAt } = useSyncState();
 
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,27 +48,21 @@ function Pantry() {
   }, []);
 
   // Everything is read from the on-device copy, so the list paints whether or
-  // not there is a network. The sync afterwards is what refreshes it.
+  // not there is a network. SyncBootstrap does the talking; this just redraws
+  // from disk on arrival and again each time a sync brings something new.
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      await openFor(user.id);
-      if (!cancelled) await redraw();
+      const loaded = await loadPantry();
+      if (cancelled) return;
+      setItems(loaded);
       setLoading(false);
-      await sync();
-      if (!cancelled) await redraw();
     })();
     return () => {
       cancelled = true;
     };
-  }, [user, redraw]);
-
-  // Coming back online is the moment the outbox should drain.
-  useEffect(() => {
-    if (!online) return;
-    sync().then(redraw);
-  }, [online, redraw]);
+  }, [user, lastSyncedAt]);
 
   const message = toast ?? lastRejection;
 
