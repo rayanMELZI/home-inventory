@@ -30,12 +30,15 @@ first deploy:** `ss -ltnp | grep 3005`.
 | `DEPLOY_KEY` | That user's private SSH key. |
 | `CF_ACCESS_CLIENT_ID` | Cloudflare Access service token id. |
 | `CF_ACCESS_CLIENT_SECRET` | Cloudflare Access service token secret. |
+| `GEMINI_API_KEY` | Meal suggestions. Optional — blank disables that one feature and nothing else. https://aistudio.google.com/apikey |
 
 ## Repository variables
 
 | Variable | Default | What it is |
 |---|---|---|
 | `SECURE_COOKIES` | `true` | Must be `true` when served over HTTPS. |
+| `GEMINI_MODEL` | `gemini-flash-latest` | The `-latest` alias on purpose: a pinned name going new-user-gated would silently break suggestions. |
+| `BACKUP_KEEP_DAYS` | `14` | How long nightly dumps are kept. |
 
 ## Things that will bite you
 
