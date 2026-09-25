@@ -29,6 +29,9 @@ services:
       SECURE_COOKIES: ${SECURE_COOKIES:-false}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-flash-latest}
+      # Overridable purely so the suggestion path can be exercised against a
+      # local stub without spending real calls (or needing a key at all).
+      GEMINI_BASE_URL: ${GEMINI_BASE_URL:-https://generativelanguage.googleapis.com/v1beta}
     depends_on:
       db:
         condition: service_healthy
