@@ -14,7 +14,7 @@ import {
   archiveItemLocally,
   type ItemDraft,
 } from "@/lib/sync";
-import { UNIT_LABELS, formatQuantity, type Item } from "@/lib/types";
+import { UNIT_LABELS, UNIT_STEP, formatQuantity, type Item } from "@/lib/types";
 
 export default function ShoppingPage() {
   return (
@@ -126,10 +126,12 @@ function ShoppingRow({
   item: Item;
   onBought: (item: Item, amount: number, unitPrice: number | null) => Promise<void>;
 }) {
-  // Pre-filled with enough to get back above the level they set, because that
-  // is the amount they almost always want and nobody wants to do the sum in a
-  // shop aisle.
-  const suggested = Math.max((item.lowThreshold ?? 1) - item.quantity, 1);
+  // Pre-filled with enough to get back ABOVE the level they set — one step
+  // past it, not exactly to it. "Low" means at or below the threshold, so
+  // refilling to exactly the threshold would leave the row sitting here after
+  // they had just bought the thing.
+  const step = UNIT_STEP[item.unit];
+  const suggested = Math.max((item.lowThreshold ?? 0) - item.quantity + step, step);
   const [amount, setAmount] = useState(String(suggested));
   const [price, setPrice] = useState("");
   const [busy, setBusy] = useState(false);
