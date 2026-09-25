@@ -21,6 +21,7 @@ class JwtServiceTest {
         return new JwtService(new AppProperties(
                 new AppProperties.Jwt(secret, 15),
                 new AppProperties.Refresh(7),
+                new AppProperties.Meals(null, null, null),
                 false));
     }
 
