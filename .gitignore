@@ -26,3 +26,6 @@ CLAUDE.md
 
 # Next.js generates this on every build
 next-env.d.ts
+
+# Local rehearsal of the production stack (see deploy/README.md)
+.prodtest/
