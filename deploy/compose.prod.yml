@@ -52,5 +52,39 @@ services:
       backend:
         condition: service_healthy
 
+  # Actually runs, unlike the cron fromNowToSuccess only ever documented.
+  # Nothing here is encrypted, so these dumps restore with no key.
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          # Dump to a temporary name first: a crash mid-write must not leave a
+          # truncated file sitting there looking like a good backup.
+          stamp=$$(date +%F)
+          if pg_dump --clean --if-exists | gzip > "/backups/.partial.sql.gz"; then
+            mv "/backups/.partial.sql.gz" "/backups/homestock-$$stamp.sql.gz"
+            echo "[backup] wrote homestock-$$stamp.sql.gz"
+          else
+            rm -f "/backups/.partial.sql.gz"
+            echo "[backup] FAILED at $$(date -Iseconds)" >&2
+          fi
+          find /backups -name 'homestock-*.sql.gz' -mtime +$$KEEP_DAYS -delete
+          sleep 86400
+        done
+
 volumes:
   db-data:
