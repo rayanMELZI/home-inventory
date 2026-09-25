@@ -72,17 +72,40 @@ services:
     command:
       - |
         while true; do
-          # Dump to a temporary name first: a crash mid-write must not leave a
-          # truncated file sitting there looking like a good backup.
           stamp=$$(date +%F)
-          if pg_dump --clean --if-exists | gzip > "/backups/.partial.sql.gz"; then
-            mv "/backups/.partial.sql.gz" "/backups/homestock-$$stamp.sql.gz"
-            echo "[backup] wrote homestock-$$stamp.sql.gz"
+          ok=no
+
+          # pg_dump's status is checked on its own, NOT through a pipe into
+          # gzip. A pipeline reports the LAST command's status, so
+          # "pg_dump | gzip" succeeds whenever gzip succeeds — which it does
+          # even when pg_dump wrote nothing at all. That is how a failed dump
+          # ends up renamed into place as a perfectly good-looking backup.
+          if pg_dump --clean --if-exists > /tmp/dump.sql 2>/tmp/dump.err; then
+            if [ -s /tmp/dump.sql ]; then
+              # Written under a temporary name and renamed, so a crash
+              # mid-write cannot leave a truncated file that looks finished.
+              if gzip -c /tmp/dump.sql > /backups/.partial.sql.gz; then
+                mv /backups/.partial.sql.gz "/backups/homestock-$$stamp.sql.gz"
+                ok=yes
+                echo "[backup] wrote homestock-$$stamp.sql.gz ($$(wc -c < "/backups/homestock-$$stamp.sql.gz") bytes)"
+              else
+                echo "[backup] FAILED: could not compress the dump" >&2
+              fi
+            else
+              echo "[backup] FAILED: pg_dump produced an empty file" >&2
+            fi
           else
-            rm -f "/backups/.partial.sql.gz"
-            echo "[backup] FAILED at $$(date -Iseconds)" >&2
+            echo "[backup] FAILED: $$(cat /tmp/dump.err)" >&2
           fi
-          find /backups -name 'homestock-*.sql.gz' -mtime +$$KEEP_DAYS -delete
+          rm -f /tmp/dump.sql /tmp/dump.err /backups/.partial.sql.gz
+
+          # Old dumps are only pruned once today's has been written. Otherwise
+          # a fortnight of failures would quietly delete every good backup
+          # there is, which is worse than having no backup job at all.
+          if [ "$$ok" = yes ]; then
+            find /backups -name 'homestock-*.sql.gz' -mtime +$$KEEP_DAYS -delete
+          fi
+
           sleep 86400
         done
 
