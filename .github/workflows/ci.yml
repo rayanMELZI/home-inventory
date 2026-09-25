@@ -122,6 +122,8 @@ jobs:
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           JWT_SECRET=${{ secrets.JWT_SECRET }}
           SECURE_COOKIES=${{ vars.SECURE_COOKIES || 'true' }}
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL=${{ vars.GEMINI_MODEL || 'gemini-flash-latest' }}
           EOF
 
       - name: Install cloudflared
