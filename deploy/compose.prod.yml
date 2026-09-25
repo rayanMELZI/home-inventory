@@ -46,8 +46,14 @@ services:
     environment:
       BACKEND_URL: http://backend:8080
     ports:
-      # localhost-only: reachable through the Cloudflare tunnel, not the network
-      - "3005:3000"
+      # The 127.0.0.1 prefix is the whole point: "3005:3000" publishes on
+      # 0.0.0.0 AND [::], so the app would answer anything that can route to
+      # the VM. Docker's published ports are also inserted ahead of the usual
+      # firewall rules, so a UFW policy would not have saved it either.
+      #
+      # nginx reverse-proxies to this from the same host, so binding the
+      # loopback is all that is needed.
+      - "127.0.0.1:3005:3000"
     depends_on:
       backend:
         condition: service_healthy
