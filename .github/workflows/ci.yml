@@ -197,8 +197,8 @@ jobs:
 
       # The backups directory has to exist before compose bind-mounts it, and
       # /opt/homestock has to exist before scp will write into it.
-      - name: Make sure the app directory exists
-        run: ssh vm 'mkdir -p /opt/homestock/backups'
+      #- name: Make sure the app directory exists
+      #  run: ssh vm 'mkdir -p /opt/homestock/backups'
 
       - name: Copy compose file and .env to the VM
         run: scp compose.prod.yml .env vm:/opt/homestock/
