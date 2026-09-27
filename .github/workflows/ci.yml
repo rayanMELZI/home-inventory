@@ -200,6 +200,10 @@ jobs:
       #- name: Make sure the app directory exists
       #  run: ssh vm 'mkdir -p /opt/homestock/backups'
 
+      - name: Test SSH connection
+        run: |
+          ssh -o BatchMode=yes vm 'printf "SSH authentication succeeded\n"'
+
       - name: Copy compose file and .env to the VM
         run: scp compose.prod.yml .env vm:/opt/homestock/
 
