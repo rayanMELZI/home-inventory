@@ -195,14 +195,23 @@ jobs:
             echo "  ProxyCommand cloudflared access ssh --hostname %h"
           } > ~/.ssh/config
 
-      # The backups directory has to exist before compose bind-mounts it, and
-      # /opt/homestock has to exist before scp will write into it.
-      #- name: Make sure the app directory exists
-      #  run: ssh vm 'mkdir -p /opt/homestock/backups'
-
       - name: Test SSH connection
         run: |
           ssh -o BatchMode=yes vm 'printf "SSH authentication succeeded\n"'
+          
+      - name: Validate deploy key
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          umask 077
+          printf '%s\n' "$DEPLOY_KEY" > /tmp/deploy_key
+          ssh-keygen -y -f /tmp/deploy_key > /tmp/deploy_key.pub
+          rm -f /tmp/deploy_key /tmp/deploy_key.pub
+      
+      # The backups directory has to exist before compose bind-mounts it, and
+      # /opt/homestock has to exist before scp will write into it.
+      - name: Make sure the app directory exists
+        run: ssh vm 'mkdir -p /opt/homestock/backups'
 
       - name: Copy compose file and .env to the VM
         run: scp compose.prod.yml .env vm:/opt/homestock/
