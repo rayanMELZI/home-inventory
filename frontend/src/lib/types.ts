@@ -17,6 +17,8 @@ export interface Item {
   id: string;
   name: string;
   category: string | null;
+  /** An emoji from lib/icons. Missing on rows cached before it existed. */
+  icon?: string | null;
   unit: Unit;
   quantity: number;
   lowThreshold: number | null;

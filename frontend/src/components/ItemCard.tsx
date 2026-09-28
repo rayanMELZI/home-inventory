@@ -35,6 +35,14 @@ export function ItemCard({
             : ""
       }`}
     >
+      <div
+        aria-hidden
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-surface-sunken text-2xl font-semibold text-ink-faint"
+      >
+        {/* No picture falls back to an initial, so the column stays aligned. */}
+        {item.icon ?? <span className="text-base">{item.name.charAt(0).toUpperCase()}</span>}
+      </div>
+
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="truncate font-medium">{item.name}</span>

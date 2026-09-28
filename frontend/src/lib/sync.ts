@@ -98,6 +98,7 @@ function optimistic(item: Item, delta: number): Item {
 export interface ItemDraft {
   name: string;
   category: string | null;
+  icon: string | null;
   unit: Unit;
   lowThreshold: number | null;
 }
@@ -162,6 +163,7 @@ function itemPayload(item: Item) {
     id: item.id,
     name: item.name,
     category: item.category,
+    icon: item.icon ?? null,
     unit: item.unit,
     lowThreshold: item.lowThreshold,
     archived: item.archived,
