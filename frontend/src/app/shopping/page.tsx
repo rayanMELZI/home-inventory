@@ -129,12 +129,10 @@ function ShoppingRow({
   item: Item;
   onBought: (item: Item, amount: number, totalPrice: number | null) => Promise<void>;
 }) {
-  // Pre-filled with enough to get back ABOVE the level they set — one step
-  // past it, not exactly to it. "Low" means at or below the threshold, so
-  // refilling to exactly the threshold would leave the row sitting here after
-  // they had just bought the thing.
+  // Pre-filled with enough to get back up to the level they set. "Low" means
+  // strictly below the threshold, so reaching it exactly takes the row off.
   const step = UNIT_STEP[item.unit];
-  const suggested = Math.max((item.lowThreshold ?? 0) - item.quantity + step, step);
+  const suggested = Math.max((item.lowThreshold ?? 0) - item.quantity, step);
   const [amount, setAmount] = useState(String(suggested));
   const [price, setPrice] = useState("");
   const [busy, setBusy] = useState(false);

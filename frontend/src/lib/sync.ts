@@ -80,13 +80,18 @@ async function refreshPending() {
   set({ pending: await pendingCount() });
 }
 
+/** Mirrors ItemDtos.toResponse: strictly below the threshold, never at it. */
+function isLow(quantity: number, threshold: number | null): boolean {
+  return threshold != null && quantity < threshold;
+}
+
 /** Applies a delta to the local copy so the screen updates before the network does. */
 function optimistic(item: Item, delta: number): Item {
   const quantity = Math.max(0, item.quantity + delta);
   return {
     ...item,
     quantity,
-    low: item.lowThreshold != null && quantity <= item.lowThreshold,
+    low: isLow(quantity, item.lowThreshold),
   };
 }
 
@@ -103,7 +108,7 @@ export async function saveItemLocally(existing: Item | null, draft: ItemDraft): 
     quantity: existing?.quantity ?? 0,
     archived: false,
     ...draft,
-    low: draft.lowThreshold != null && (existing?.quantity ?? 0) <= draft.lowThreshold,
+    low: isLow(existing?.quantity ?? 0, draft.lowThreshold),
     updatedAt: new Date().toISOString(),
   };
   await putItems([item]);

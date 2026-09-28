@@ -51,8 +51,10 @@ public class ItemDtos {
             Instant occurredAt) {}
 
     public static ItemResponse toResponse(Item item) {
+        // Strictly below: holding exactly the amount you said you want to
+        // keep is not running out.
         boolean low = item.getLowThreshold() != null
-                && item.getQuantity().compareTo(item.getLowThreshold()) <= 0;
+                && item.getQuantity().compareTo(item.getLowThreshold()) < 0;
         return new ItemResponse(item.getId(), item.getName(), item.getCategory(), item.getUnit(),
                 item.getQuantity(), item.getLowThreshold(), low, item.isArchived(),
                 item.getUpdatedAt());

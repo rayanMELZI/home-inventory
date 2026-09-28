@@ -162,7 +162,7 @@ export function ItemForm({
         </div>
 
         <label className="block">
-          <span className="field-label">Tell me when it drops to</span>
+          <span className="field-label">Tell me when it drops below</span>
           <input
             type="number"
             min={0}
@@ -174,7 +174,7 @@ export function ItemForm({
             className="field mt-1"
           />
           <span className="mt-1 block text-xs text-ink-faint">
-            In {UNIT_LABELS[unit]}. At or below this it lands on the shopping list.
+            In {UNIT_LABELS[unit]}. Below this it lands on the shopping list.
           </span>
         </label>
 

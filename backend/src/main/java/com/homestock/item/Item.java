@@ -39,7 +39,7 @@ public class Item {
     @Column(nullable = false)
     private BigDecimal quantity = BigDecimal.ZERO;
 
-    /** At or below this, the item shows up on the shopping list. Null = never. */
+    /** Below this, the item shows up on the shopping list. Null = never. */
     @Column(name = "low_threshold")
     private BigDecimal lowThreshold;
 
