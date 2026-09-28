@@ -18,6 +18,7 @@ public class ItemDtos {
             UUID id,
             @NotBlank @Size(max = 80) String name,
             @Size(max = 40) String category,
+            @Size(max = 16) String icon,
             @NotNull Unit unit,
             @DecimalMin("0.0") BigDecimal lowThreshold) {}
 
@@ -33,6 +34,7 @@ public class ItemDtos {
             UUID id,
             String name,
             String category,
+            String icon,
             Unit unit,
             BigDecimal quantity,
             BigDecimal lowThreshold,
@@ -55,7 +57,8 @@ public class ItemDtos {
         // keep is not running out.
         boolean low = item.getLowThreshold() != null
                 && item.getQuantity().compareTo(item.getLowThreshold()) < 0;
-        return new ItemResponse(item.getId(), item.getName(), item.getCategory(), item.getUnit(),
+        return new ItemResponse(item.getId(), item.getName(), item.getCategory(), item.getIcon(),
+                item.getUnit(),
                 item.getQuantity(), item.getLowThreshold(), low, item.isArchived(),
                 item.getUpdatedAt());
     }

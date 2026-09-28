@@ -49,7 +49,7 @@ public class BackupService {
         // what you deleted is not a backup of what happened.
         List<BackupItem> items = itemRepository.findByUserId(userId).stream()
                 .map(item -> new BackupItem(item.getId(), item.getName(), item.getCategory(),
-                        item.getUnit(), item.getLowThreshold(), item.isArchived(),
+                        item.getIcon(), item.getUnit(), item.getLowThreshold(), item.isArchived(),
                         item.getUpdatedAt()))
                 .toList();
 
@@ -97,6 +97,7 @@ public class BackupService {
             }
             item.setName(incoming.name());
             item.setCategory(incoming.category());
+            item.setIcon(incoming.icon());
             item.setUnit(incoming.unit());
             item.setLowThreshold(incoming.lowThreshold());
             item.setArchived(incoming.archived());

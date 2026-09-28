@@ -79,6 +79,7 @@ public class SyncService {
             }
             item.setName(payload.name().trim());
             item.setCategory(payload.category());
+            item.setIcon(payload.icon());
             item.setUnit(payload.unit());
             item.setLowThreshold(payload.lowThreshold());
             item.setArchived(payload.archived());

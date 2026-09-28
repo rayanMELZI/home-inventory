@@ -139,9 +139,14 @@ public class ItemService {
         item.setCategory(request.category() == null || request.category().isBlank()
                 ? null
                 : request.category().trim());
+        item.setIcon(blankToNull(request.icon()));
         item.setUnit(request.unit());
         item.setLowThreshold(request.lowThreshold());
         item.setUpdatedAt(Instant.now());
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.strip();
     }
 
     private Item find(Long userId, UUID id) {

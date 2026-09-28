@@ -119,7 +119,7 @@ class SyncServiceTest {
         eggs.setUpdatedAt(NOON.plus(1, ChronoUnit.HOURS));
 
         service.sync(USER, new SyncRequest(null,
-                List.of(new ItemPayload(eggs.getId(), "Eggs", null, Unit.PIECE, null, false, NOON)),
+                List.of(new ItemPayload(eggs.getId(), "Eggs", null, null, Unit.PIECE, null, false, NOON)),
                 List.of()));
 
         assertThat(eggs.getName()).isEqualTo("Eggs, large");
@@ -128,12 +128,13 @@ class SyncServiceTest {
     @Test
     void aNewerItemEditFromTheDeviceWins() {
         service.sync(USER, new SyncRequest(null,
-                List.of(new ItemPayload(eggs.getId(), "Free-range eggs", "Fridge", Unit.PIECE,
+                List.of(new ItemPayload(eggs.getId(), "Free-range eggs", "Fridge", "🥚", Unit.PIECE,
                         new BigDecimal("6"), false, NOON.plus(1, ChronoUnit.HOURS))),
                 List.of()));
 
         assertThat(eggs.getName()).isEqualTo("Free-range eggs");
         assertThat(eggs.getLowThreshold()).isEqualByComparingTo("6");
+        assertThat(eggs.getIcon()).isEqualTo("🥚");
     }
 
     /** The cursor must not sit after rows this very call wrote, or they'd never be pulled. */

@@ -76,7 +76,7 @@ class BackupServiceTest {
     }
 
     private static BackupItem fileItem(UUID id, Instant updatedAt) {
-        return new BackupItem(id, "Eggs", "Fridge", Unit.PIECE, new BigDecimal("4"), false, updatedAt);
+        return new BackupItem(id, "Eggs", "Fridge", "🥚", Unit.PIECE, new BigDecimal("4"), false, updatedAt);
     }
 
     private static BackupEvent fileEvent(UUID id, UUID itemId, String delta) {

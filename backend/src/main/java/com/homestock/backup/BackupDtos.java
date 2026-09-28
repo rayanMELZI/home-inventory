@@ -10,6 +10,7 @@ import com.homestock.item.Unit;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class BackupDtos {
 
@@ -35,6 +36,8 @@ public class BackupDtos {
             @NotNull UUID id,
             @NotNull String name,
             String category,
+            /* Absent from files written before V4; reads back as null. */
+            @Size(max = 16) String icon,
             @NotNull Unit unit,
             BigDecimal lowThreshold,
             boolean archived,

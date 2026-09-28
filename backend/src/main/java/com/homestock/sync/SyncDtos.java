@@ -28,6 +28,7 @@ public class SyncDtos {
             @NotNull UUID id,
             @NotNull @Size(max = 80) String name,
             @Size(max = 40) String category,
+            @Size(max = 16) String icon,
             @NotNull Unit unit,
             BigDecimal lowThreshold,
             boolean archived,

@@ -31,6 +31,9 @@ public class Item {
 
     private String category;
 
+    /** An emoji picked from the app's presets. Null = none chosen. */
+    private String icon;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Unit unit = Unit.PIECE;
