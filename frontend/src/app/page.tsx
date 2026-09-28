@@ -89,8 +89,8 @@ function Pantry() {
     }
   }
 
-  async function onSave(draft: ItemDraft) {
-    await saveItemLocally(editing, draft);
+  async function onSave(draft: ItemDraft, startingQuantity: number) {
+    await saveItemLocally(editing, draft, startingQuantity);
     await redraw();
   }
 

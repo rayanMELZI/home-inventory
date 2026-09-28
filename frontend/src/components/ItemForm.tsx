@@ -40,7 +40,8 @@ export function ItemForm({
   /** Categories already in use, offered first so "Fridge" isn't retyped as "fridge". */
   categories: string[];
   onClose: () => void;
-  onSave: (draft: ItemDraft) => Promise<void>;
+  /** `startingQuantity` is only asked for, and only sent, when adding. */
+  onSave: (draft: ItemDraft, startingQuantity: number) => Promise<void>;
   onArchive: (item: Item) => Promise<void>;
 }) {
   const [name, setName] = useState(item?.name ?? "");
@@ -53,6 +54,7 @@ export function ItemForm({
   const [picked, setPicked] = useState<string | null | undefined>(item?.icon ?? undefined);
   const [pickingIcon, setPickingIcon] = useState(false);
   const [unit, setUnit] = useState<Unit>(item?.unit ?? "PIECE");
+  const [startingQuantity, setStartingQuantity] = useState("");
   const [lowThreshold, setLowThreshold] = useState(
     item?.lowThreshold != null ? String(item.lowThreshold) : "",
   );
@@ -96,13 +98,17 @@ export function ItemForm({
     setError(null);
     try {
       const parsed = lowThreshold.trim() === "" ? null : Number(lowThreshold);
-      await onSave({
-        name: typed,
-        category: category.trim() === "" ? null : category.trim(),
-        icon,
-        unit,
-        lowThreshold: parsed != null && Number.isFinite(parsed) ? parsed : null,
-      });
+      const starting = Number(startingQuantity);
+      await onSave(
+        {
+          name: typed,
+          category: category.trim() === "" ? null : category.trim(),
+          icon,
+          unit,
+          lowThreshold: parsed != null && Number.isFinite(parsed) ? parsed : null,
+        },
+        Number.isFinite(starting) && starting > 0 ? starting : 0,
+      );
       onClose();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong");
@@ -276,6 +282,23 @@ export function ItemForm({
             <Segmented value={unit} onChange={setUnit} options={UNITS} ariaLabel="Unit" />
           </div>
         </div>
+
+        {!item && (
+          <label className="block">
+            <span className="field-label">How much you have now</span>
+            <input
+              type="number"
+              min={0}
+              step="any"
+              inputMode="decimal"
+              value={startingQuantity}
+              onChange={(e) => setStartingQuantity(e.target.value)}
+              placeholder="0"
+              className="field mt-1"
+            />
+            <span className="mt-1 block text-xs text-ink-faint">In {UNIT_LABELS[unit]}.</span>
+          </label>
+        )}
 
         <label className="block">
           <span className="field-label">Tell me when it drops below</span>

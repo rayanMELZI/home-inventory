@@ -106,8 +106,8 @@ function Shopping() {
         item={null}
         categories={categoriesOf(items)}
         onClose={() => setFormOpen(false)}
-        onSave={async (draft: ItemDraft) => {
-          await saveItemLocally(null, draft);
+        onSave={async (draft: ItemDraft, startingQuantity: number) => {
+          await saveItemLocally(null, draft, startingQuantity);
           await redraw();
         }}
         onArchive={async (item) => {

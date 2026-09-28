@@ -103,7 +103,16 @@ export interface ItemDraft {
   lowThreshold: number | null;
 }
 
-export async function saveItemLocally(existing: Item | null, draft: ItemDraft): Promise<Item> {
+/**
+ * `startingQuantity` only applies to a new item. It goes in as an ADJUST, not
+ * a PURCHASE: it is what was already in the cupboard, not something bought
+ * today, and a PURCHASE would count towards spending and shopping history.
+ */
+export async function saveItemLocally(
+  existing: Item | null,
+  draft: ItemDraft,
+  startingQuantity = 0,
+): Promise<Item> {
   const item: Item = {
     id: existing?.id ?? crypto.randomUUID(),
     quantity: existing?.quantity ?? 0,
@@ -114,6 +123,11 @@ export async function saveItemLocally(existing: Item | null, draft: ItemDraft): 
   };
   await putItems([item]);
   await enqueue({ id: `item:${item.id}`, kind: "item", payload: itemPayload(item), queuedAt: Date.now() });
+  if (!existing && startingQuantity > 0) {
+    // Queued after the item, and the server applies items before events, so
+    // the event never arrives for an item it has not heard of yet.
+    return recordEventLocally(item, "ADJUST", startingQuantity);
+  }
   await refreshPending();
   void sync();
   return item;
