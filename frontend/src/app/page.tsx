@@ -17,7 +17,7 @@ import {
   useSyncState,
   type ItemDraft,
 } from "@/lib/sync";
-import type { Item } from "@/lib/types";
+import { categoriesOf, type Item } from "@/lib/types";
 
 const ALL = "__all__";
 
@@ -66,10 +66,7 @@ function Pantry() {
 
   const message = toast ?? lastRejection;
 
-  const categories = useMemo(
-    () => [...new Set(items.map((i) => i.category).filter((c): c is string => !!c))].sort(),
-    [items],
-  );
+  const categories = useMemo(() => categoriesOf(items), [items]);
 
   const visible = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -196,6 +193,7 @@ function Pantry() {
         key={formKey}
         open={formOpen}
         item={editing}
+        categories={categories}
         onClose={() => setFormOpen(false)}
         onSave={onSave}
         onArchive={onArchive}

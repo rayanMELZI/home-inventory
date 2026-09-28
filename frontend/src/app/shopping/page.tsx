@@ -14,7 +14,7 @@ import {
   useSyncState,
   type ItemDraft,
 } from "@/lib/sync";
-import { UNIT_LABELS, UNIT_STEP, formatQuantity, type Item } from "@/lib/types";
+import { UNIT_LABELS, UNIT_STEP, categoriesOf, formatQuantity, type Item } from "@/lib/types";
 
 export default function ShoppingPage() {
   return (
@@ -104,6 +104,7 @@ function Shopping() {
         key={formKey}
         open={formOpen}
         item={null}
+        categories={categoriesOf(items)}
         onClose={() => setFormOpen(false)}
         onSave={async (draft: ItemDraft) => {
           await saveItemLocally(null, draft);

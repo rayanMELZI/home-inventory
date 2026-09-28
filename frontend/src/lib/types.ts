@@ -57,3 +57,8 @@ export function formatQuantity(quantity: number, unit: Unit): string {
   const number = Number.isInteger(rounded) ? String(rounded) : String(rounded);
   return unit === "PIECE" ? number : `${number} ${unit.toLowerCase()}`;
 }
+
+/** Every category in use, once each, sorted — for filters and pickers. */
+export function categoriesOf(items: Item[]): string[] {
+  return [...new Set(items.map((i) => i.category).filter((c): c is string => !!c))].sort();
+}
