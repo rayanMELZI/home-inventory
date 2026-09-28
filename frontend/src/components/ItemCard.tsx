@@ -27,19 +27,34 @@ export function ItemCard({
   return (
     <div
       className={`card flex items-center gap-3 p-3.5 ${
-        item.low ? "border-accent/60" : ""
+        // Empty outranks low: "low" is a heads-up, "empty" is already too late.
+        empty
+          ? "border-red-300 bg-red-50/60 dark:border-red-900/70 dark:bg-red-950/25"
+          : item.low
+            ? "border-accent/60"
+            : ""
       }`}
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="truncate font-medium">{item.name}</span>
-          {item.low && (
-            <span className="shrink-0 rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-medium text-accent-ink">
-              low
+          {empty ? (
+            <span className="shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-medium text-red-700 dark:bg-red-950/60 dark:text-red-300">
+              empty
             </span>
+          ) : (
+            item.low && (
+              <span className="shrink-0 rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-medium text-accent-ink">
+                low
+              </span>
+            )
           )}
         </div>
-        <p className="mt-0.5 text-sm tabular-nums text-ink-soft">
+        <p
+          className={`mt-0.5 text-sm tabular-nums ${
+            empty ? "text-red-700 dark:text-red-300" : "text-ink-soft"
+          }`}
+        >
           {empty ? "none left" : formatQuantity(item.quantity, item.unit)}
           {item.category && <span className="text-ink-faint"> · {item.category}</span>}
         </p>
